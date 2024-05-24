@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Search</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+  />
+    <link rel="stylesheet" href="../static/main.css" />
+    <style>
+        .btn-primary {
+        background-color: #ff6656;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        background-color: #9e463c;
+      }
+        .container {
+            max-width: 800px;
+            width: 90%;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .recipe {
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #ddd;
+        }
+        .recipe h2 {
+            margin-bottom: 10px;
+            color: #007bff;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .ingredients, .instructions {
+            margin-bottom: 20px;
+        }
+        .ingredients p, .instructions p {
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 16px;
+        }
+        .ingredients ul, .instructions ol {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+        .ingredients ul li, .instructions ol li {
+            margin-bottom: 8px;
+            color: #444;
+        }
+        .instructions ol {
+            list-style-type: decimal;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar desktop-menu">
+        <div class="logo">
+          <a style="text-decoration: none; color: #ff6656;" href="{{ url_for('home') }}"
+            ><img
+              src=""
+          />RECIPE SITE GENERATOR</a>
+        </div>
+        <div id="menuSection" class="menu-sec">
+          <ul class="nav-menu">
+            <li><a class="active" href="#">Home</a></li>
+            <li><a href="#aboutus">About</a></li>
+            {% if 'email' in session %}
+              <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+              <li><a href="{{ url_for('login') }}">Login</a></li>
+              <li><a href="{{ url_for('register') }}">Register</a></li>
+            {% endif %}
+          </ul>
+        </div>
+        <div class="social-icons">
+          <i class="fab fa-facebook"></i>
+          <i class="fab fa-instagram"></i>
+          <i class="fab fa-github"></i>
+          <i class="fas fa-basketball-ball"></i>
+        </div>
+      </div>
+      
+      <div
+        onclick="closeMobMenuToggle()"
+        id="mobMenuCont"
+        class="mob-menu-container"
+      >
+        <img
+          src="#"
+          alt="close-icon"
+        />
+      </div>
+      <div id="mobMenuWrap" class="mob-menu-wrap">
+        <div class="menu-content">
+          <div class="menu-items">
+            <ul class="nav-menu">
+              <li><a class="active" href="#">Home</a></li>
+              <li><a href="">About</a></li>
+              <li><a href="#">Services</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+          <div class="social-items">
+            <div class="social-icons">
+              <i class="fab fa-facebook"></i>
+              <i class="fab fa-instagram"></i>
+              <i class="fab fa-github"></i>
+              <i class="fas fa-basketball-ball"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mobile-menu">
+        <div class="logo">
+          <a href="#"
+            ><img
+              src="https://raw.githubusercontent.com/arravind-r/Responsive-HTML5-Navigation-Menu/main/src/logo.png"
+              alt="my-logo"
+          /></a>
+        </div>
+        <button onclick="mobMenuToggle()" class="menu">Menu</button>
+      </div>
+    <br>
+    <br>
+    <div class="container">
+        <h1>Recipe Generator</h1>
+        <form id="recipe-search-form">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="search-input" name="search_query" placeholder="Enter ingredients or dish name...">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button" id="search-button">Generate</button>
+                </div>
+            </div>
+        </form>
+        <div id="search-results"></div>
+    </div>
+    <br>
+    <br>
+   
+    <div class="footer">
+        <p>
+          Copyright © 2024 | Developed by
+          <a href="https://learnwithsanto.netlify.app" target="_blank">Santo</a>
+        </p>
+      </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#search-button').click(function() {
+                var searchQuery = $('#search-input').val();
+                $.post('/search_recipe', {'search_query': searchQuery}, function(data) {
+                    displayRecipes(data.recipes);
+                });
+            });
+        });
+
+        function displayRecipes(recipes) {
+            var resultsContainer = $('#search-results');
+            resultsContainer.empty();
+
+            if (recipes.length === 0) {
+                resultsContainer.html('<p>No recipes found.</p>');
+            } else {
+                recipes.forEach(function(recipe) {
+                    var titleIndex = recipe.indexOf('Instructions:');
+                    var ingredients = recipe.substring(recipe.indexOf('Ingredients:') + 'Ingredients:'.length, titleIndex).trim();
+                    var instructions = recipe.substring(titleIndex + 'Instructions:'.length).trim();
+                    var recipeHtml = '<div class="recipe">' +
+                                        '<h2>' + getRecipeTitle(recipe) + '</h2>' +
+                                        '<div class="ingredients"><p><strong>Ingredients:</strong></p>' +
+                                        formatIngredients(ingredients) +
+                                        '</div>' +
+                                        '<div class="instructions"><p><strong>Instructions:</strong></p>' +
+                                        formatInstructions(instructions) +
+                                        '</div>' +
+                                    '</div>';
+                    resultsContainer.append(recipeHtml);
+                });
+            }
+        }
+
+        function getRecipeTitle(recipe) {
+            return recipe.split('\n')[0];
+        }
+
+        function formatIngredients(ingredients) {
+            var ingredientsList = ingredients.split('\n').map(function(ingredient) {
+                return '<li>' + ingredient.trim() + '</li>';
+            }).join('');
+            return '<ul>' + ingredientsList + '</ul>';
+        }
+
+        function formatInstructions(instructions) {
+            var instructionsList = instructions.split('\n').map(function(instruction) {
+                return '<li>' + instruction.trim().slice(3) + '</li>';
+            }).join('');
+            return '<ol>' + instructionsList + '</ol>';
+        }
+    </script> <script>
+        $(document).ready(function() {
+            $('#search-button').click(function() {
+                var searchQuery = $('#search-input').val();
+                $.post('/search_recipe', {'search_query': searchQuery}, function(data) {
+                    displayRecipes(data.recipes);
+                });
+            });
+        });
+
+        function displayRecipes(recipes) {
+            var resultsContainer = $('#search-results');
+            resultsContainer.empty();
+
+            if (recipes.length === 0) {
+                resultsContainer.html('<p>No recipes found.</p>');
+            } else {
+                recipes.forEach(function(recipe) {
+                    var titleIndex = recipe.indexOf('Instructions:');
+                    var ingredients = recipe.substring(recipe.indexOf('Ingredients:') + 'Ingredients:'.length, titleIndex).trim();
+                    var instructions = recipe.substring(titleIndex + 'Instructions:'.length).trim();
+                    var recipeHtml = '<div class="recipe">' +
+                                        '<h2>' + getRecipeTitle(recipe) + '</h2>' +
+                                        '<div class="ingredients"><p><strong>Ingredients:</strong></p>' +
+                                        formatIngredients(ingredients) +
+                                        '</div>' +
+                                        '<div class="instructions"><p><strong>Instructions:</strong></p>' +
+                                        formatInstructions(instructions) +
+                                        '</div>' +
+                                        '<div class="feedback-link">' +
+                                        '<a href="LINK_TO_YOUR_GOOGLE_FORM" target="_blank">Leave Feedback</a>' +
+                                        '</div>' +
+                                    '</div>';
+                    resultsContainer.append(recipeHtml);
+                });
+            }
+        }
+
+        function getRecipeTitle(recipe) {
+            return recipe.split('\n')[0];
+        }
+
+        function formatIngredients(ingredients) {
+            var ingredientsList = ingredients.split('\n').map(function(ingredient) {
+                return '<li>' + ingredient.trim() + '</li>';
+            }).join('');
+            return '<ul>' + ingredientsList + '</ul>';
+        }
+
+        function formatInstructions(instructions) {
+            var instructionsList = instructions.split('\n').map(function(instruction) {
+                return '<li>' + instruction.trim().slice(3) + '</li>';
+            }).join('');
+            return '<ol>' + instructionsList + '</ol>';
+        }
+    </script>
+</body>
+</html>

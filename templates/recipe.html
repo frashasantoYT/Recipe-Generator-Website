@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ recipe.title }}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>{{ recipe.title }}</h1>
+        <h2 class="mt-4">Ingredients:</h2>
+        <ul class="list-group">
+            {% for ingredient in recipe.ingredients %}
+            <li class="list-group-item">{{ ingredient }}</li>
+            {% endfor %}
+        </ul>
+        <h2 class="mt-4">Instructions:</h2>
+        <ol class="list-group">
+            {% for instruction in recipe.instructions %}
+            <li class="list-group-item">{{ instruction }}</li>
+            {% endfor %}
+        </ol>
+    </div>
+</body>
+</html>
