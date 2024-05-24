@@ -4,12 +4,15 @@ This is a Flask-based web application for managing recipes. Users can register, 
 
 
 ## Features
+<ul>
 
-User Authentication: Users can register, log in, and log out securely.
-Password Reset: Users can reset their passwords if forgotten.
-Recipe Management: Users can search for recipes.
-Database Integration: SQLite3 is used for storing user information.
+<li>User Authentication: Users can register, log in, and log out securely.
+</li>
+<li>Password Reset: Users can reset their passwords if forgotten.</li>
+<li>Recipe Management: Users can search for recipes.</li>
+<li>Database Integration: SQLite3 is used for storing user information.</li>
 
+</ul>
 ### Installation 
 
 1. Clone this repository: 
